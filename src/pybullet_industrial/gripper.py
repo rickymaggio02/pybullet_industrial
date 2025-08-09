@@ -22,10 +22,10 @@ class Gripper(EndeffectorTool):
                                             Defaults to None in which case the base link is used.
     """
 
-    def __init__(self, urdf_model: str, start_position, start_orientation,
+    def __init__(self, urdf_model: str, start_position, start_orientation, pybullet_server, 
                  coupled_robots=None, tcp_frame=None, connector_frames=None):
 
-        super().__init__(urdf_model, start_position, start_orientation,
+        super().__init__(urdf_model, start_position, start_orientation, pybullet_server,
                          coupled_robots, tcp_frame, connector_frames)
 
         self._joint_name_to_index = {}
@@ -108,10 +108,10 @@ class SuctionGripper(EndeffectorTool):
 
     """
 
-    def __init__(self, urdf_model: str, start_position, start_orientation,
+    def __init__(self, urdf_model: str, start_position, start_orientation, pybullet_server,
                  coupled_robots=None, tcp_frame=None, connector_frames=None, suction_links=None):
 
-        super().__init__(urdf_model, start_position, start_orientation,
+        super().__init__(urdf_model, start_position, start_orientation, pybullet_server,
                          coupled_robots, tcp_frame, connector_frames)
         self.suction_constraints = []
         self._suction_links_ids = []

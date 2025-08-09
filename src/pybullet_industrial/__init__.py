@@ -17,3 +17,4 @@ from pybullet_industrial.agv_robots import *
 from pybullet_industrial.g_code_logger import *
 from pybullet_industrial.g_code_simplifier import *
 from pybullet_industrial.collision_checker import *
+from pybullet_industrial.motion_planner import *

@@ -33,12 +33,14 @@ class Camera(EndeffectorTool):
                                          Defaults to None in which case the base link is used.
     """
 
-    def __init__(self, urdf_model: str, start_position: np.array, start_orientation: np.array,
+    def __init__(self, urdf_model: str, start_position: np.array, start_orientation: np.array, pybullet_server,
                  camera_parameters: Dict, coupled_robot: RobotBase = None,
                  camera_frame: str = None, connector_frame: str = None):
 
-        super().__init__(urdf_model, start_position, start_orientation,
+        super().__init__(urdf_model, start_position, start_orientation, pybullet_server, 
                          coupled_robot, camera_frame, connector_frame)
+
+        self.server = pybullet_server
 
         self.camera_parameters = {'width': 480,
                                   'height': 240,
@@ -55,7 +57,7 @@ class Camera(EndeffectorTool):
         aspect_ratio = self.camera_parameters['aspect ratio']
         near_plane = self.camera_parameters['near plane distance']
         far_plane = self.camera_parameters['far plane distance']
-        projection_matrix = p.computeProjectionMatrixFOV(
+        projection_matrix = self.server.computeProjectionMatrixFOV(
             fov, aspect_ratio, near_plane, far_plane)
         return projection_matrix
 
@@ -81,11 +83,11 @@ class Camera(EndeffectorTool):
         Returns:
             np.array: A array of pixel colors in rgba format in 255 color format
         """
-        link_state = p.getLinkState(
+        link_state = self.server.getLinkState(
             self.urdf, self._tcp_id, computeForwardKinematics=True)
         com_p = np.array(link_state[0])
         com_o = np.array(link_state[1])
-        rot_matrix = p.getMatrixFromQuaternion(com_o)
+        rot_matrix = self.server.getMatrixFromQuaternion(com_o)
         rot_matrix = np.array(rot_matrix).reshape(3, 3)
         # Initial vectors
         init_camera_vector = (0, 0, 1)  # z-axis
@@ -93,12 +95,12 @@ class Camera(EndeffectorTool):
         # Rotated vectors
         camera_vector = rot_matrix.dot(init_camera_vector)
         up_vector = rot_matrix.dot(init_up_vector)
-        view_matrix = p.computeViewMatrix(
+        view_matrix = self.server.computeViewMatrix(
             com_p, com_p + 0.1 * camera_vector, up_vector)
 
         width = self.camera_parameters['width']
         height = self.camera_parameters['height']
-        images = p.getCameraImage(
+        images = self.server.getCameraImage(
             width, height, view_matrix, self.projection_matrix)
         img = np.reshape(images[2], (height, width, 4))
         return img

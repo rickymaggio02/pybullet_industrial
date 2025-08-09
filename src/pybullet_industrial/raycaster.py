@@ -30,11 +30,11 @@ class RayCaster(EndeffectorTool):
                                          Defaults to None in which case the base link is used.
         """
 
-    def __init__(self, urdf_model: str, start_position: np.array, start_orientation: np.array,
+    def __init__(self, urdf_model: str, start_position: np.array, start_orientation: np.array, pybullet_server,
                  raycast_properties: Dict, coupled_robot: RobotBase = None,
                  tcp_frame: str = None, connector_frame: str = None):
 
-        super().__init__(urdf_model, start_position, start_orientation,
+        super().__init__(urdf_model, start_position, start_orientation, pybullet_server,
                          coupled_robot, tcp_frame, connector_frame)
 
         self.properties = {'opening angle': 0,

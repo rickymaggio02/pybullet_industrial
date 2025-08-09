@@ -16,16 +16,17 @@ class RobotBase:
                                              when controlling the robots position
     """
 
-    def __init__(self, urdf_model: str, start_position: np.array, start_orientation: np.array,
+    def __init__(self, urdf_model: str, start_position: np.array, start_orientation: np.array, pybullet_server,
                  default_endeffector: str = None):
 
         urdf_flags = p.URDF_USE_SELF_COLLISION_EXCLUDE_ALL_PARENTS
-        self.urdf = p.loadURDF(urdf_model,
+        self.server = pybullet_server
+        self.urdf = self.server.loadURDF(urdf_model,
                                start_position, start_orientation,
                                flags=urdf_flags,
                                useFixedBase=True)
 
-        self.number_of_joints = p.getNumJoints(self.urdf)
+        self.number_of_joints = self.server.getNumJoints(self.urdf)
         self._joint_state_shape = self.get_joint_state()
         self._joint_name_to_index = {}
         self._link_name_to_index = {}
@@ -34,7 +35,7 @@ class RobotBase:
         self._upper_joint_limit = np.zeros(self.number_of_joints)
 
         for joint_number in range(self.number_of_joints):
-            joint_info = p.getJointInfo(self.urdf, joint_number)
+            joint_info = self.server.getJointInfo(self.urdf, joint_number)
             link_name = joint_info[12].decode("utf-8")
             self._link_name_to_index[link_name] = joint_number
 
@@ -63,7 +64,7 @@ class RobotBase:
 
         self.max_joint_force = 1000*np.ones(self.number_of_joints)
         for joint_number in range(self.number_of_joints):
-            p.resetJointState(self.urdf, joint_number, targetValue=0)
+            self.server.resetJointState(self.urdf, joint_number, targetValue=0)
 
     def get_joint_limits(self):
         """
@@ -113,11 +114,11 @@ class RobotBase:
         """
         joint_state = {}
         for joint_number in range(self.number_of_joints):
-            joint_info = p.getJointInfo(self.urdf, joint_number)
+            joint_info = self.server.getJointInfo(self.urdf, joint_number)
             if joint_info[2] != 4:  # checks if the joint is not fixed
                 # convert byte string to string
                 joint_name = joint_info[1].decode("utf-8")
-                joint_state_list = p.getJointState(self.urdf, joint_number)
+                joint_state_list = self.server.getJointState(self.urdf, joint_number)
 
                 single_joint_state = {'position': joint_state_list[0],
                                       'velocity': joint_state_list[1],
@@ -151,7 +152,7 @@ class RobotBase:
                                      ' is out of limit for joint '+joint+'. Its limits are:\n' +
                                      str(lower_joint_limit)+' and '+str(upper_joint_limit))
 
-            p.setJointMotorControl2(self.urdf, joint_number, p.POSITION_CONTROL,
+            self.server.setJointMotorControl2(self.urdf, joint_number, p.POSITION_CONTROL,
                                     force=self.max_joint_force[joint_number],
                                     targetPosition=joint_position)
 
@@ -188,7 +189,7 @@ class RobotBase:
                                      ' is out of limit for joint '+joint+'. Its limits are:\n' +
                                      str(lower_joint_limit)+' and '+str(upper_joint_limit))
 
-            p.resetJointState(
+            self.server.resetJointState(
                 self.urdf,
                 joint_number,
                 targetValue=joint_position
@@ -209,7 +210,7 @@ class RobotBase:
         else:
             endeffector_id = self._convert_endeffector(endeffector_name)
 
-        link_state = p.getLinkState(self.urdf, endeffector_id)
+        link_state = self.server.getLinkState(self.urdf, endeffector_id)
 
         position = np.array(link_state[0])
         orientation = np.array(link_state[1])
@@ -249,13 +250,13 @@ class RobotBase:
             endeffector_id = self._convert_endeffector(endeffector_name)
 
         if target_orientation is None:
-            joint_poses = p.calculateInverseKinematics(self.urdf,
+            joint_poses = self.server.calculateInverseKinematics(self.urdf,
                                                        endeffector_id,
                                                        target_position,
                                                        lowerLimits=self._lower_joint_limit,
                                                        upperLimits=self._upper_joint_limit)
         else:
-            joint_poses = p.calculateInverseKinematics(self.urdf,
+            joint_poses = self.server.calculateInverseKinematics(self.urdf,
                                                        endeffector_id,
                                                        target_position,
                                                        targetOrientation=target_orientation,
@@ -264,7 +265,7 @@ class RobotBase:
 
         for index, joint_position in enumerate(joint_poses):
             joint_number = self._kinematic_solver_map[index]
-            p.setJointMotorControl2(self.urdf, joint_number, p.POSITION_CONTROL,
+            self.server.setJointMotorControl2(self.urdf, joint_number, p.POSITION_CONTROL,
                                     force=self.max_joint_force[joint_number],
                                     targetPosition=joint_position)
 
@@ -292,7 +293,7 @@ class RobotBase:
             endeffector_id = self._convert_endeffector(endeffector_name)
 
         if target_orientation is None:
-            joint_poses = p.calculateInverseKinematics(
+            joint_poses = self.server.calculateInverseKinematics(
                 self.urdf,
                 endeffector_id,
                 target_position,
@@ -300,7 +301,7 @@ class RobotBase:
                 upperLimits=self._upper_joint_limit
             )
         else:
-            joint_poses = p.calculateInverseKinematics(
+            joint_poses = self.server.calculateInverseKinematics(
                 self.urdf,
                 endeffector_id,
                 target_position,
@@ -311,7 +312,7 @@ class RobotBase:
 
         for index, joint_position in enumerate(joint_poses):
             joint_number = self._kinematic_solver_map[index]
-            p.resetJointState(
+            self.server.resetJointState(
                 self.urdf,
                 joint_number,
                 targetValue=joint_position
@@ -335,7 +336,7 @@ class RobotBase:
         if joint_values is None:
             joint_values = np.zeros(self.number_of_joints)
         for joint in range(self.number_of_joints):
-            p.resetJointState(self.urdf, joint,
+            self.server.resetJointState(self.urdf, joint,
                               targetValue=joint_values[joint])
 
     def set_world_state(self, start_position: np.array, start_orientation: np.array):
@@ -346,7 +347,7 @@ class RobotBase:
             start_orientation (np.array): a 4 dimensional quaternion representing
                                           the desired orientation
         """
-        p.resetBasePositionAndOrientation(
+        self.server.resetBasePositionAndOrientation(
             self.urdf, start_position, start_orientation)
 
     def get_world_state(self):
@@ -356,7 +357,7 @@ class RobotBase:
             list: the 3 dimensional position vector of the robot base
             list: a 4 dimensional quaternion representing the orientation of the robot base
         """
-        return p.getBasePositionAndOrientation(self.urdf)
+        return self.server.getBasePositionAndOrientation(self.urdf)
 
     def _convert_endeffector(self, endeffector: str):
         """Internal Function which converts an endeffector name to an id

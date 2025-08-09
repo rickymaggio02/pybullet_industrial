@@ -22,20 +22,21 @@ class EndeffectorTool:
                                          the base link is used.
     """
 
-    def __init__(self, urdf_model: str, start_position: np.array, start_orientation: np.array,
+    def __init__(self, urdf_model: str, start_position: np.array, start_orientation: np.array, pybullet_server,
                  coupled_robot: RobotBase = None, tcp_frame: str = None,
                  connector_frame: str = None):
 
+        self.server = pybullet_server
         urdf_flags = p.URDF_USE_SELF_COLLISION_EXCLUDE_ALL_PARENTS
-        self.urdf = p.loadURDF(urdf_model,
+        self.urdf = self.server.loadURDF(urdf_model,
                                start_position, start_orientation,
                                flags=urdf_flags,
                                useFixedBase=False)
 
         self._link_name_to_index = {}
         self._coupled_robots = {}
-        for joint_number in range(p.getNumJoints(self.urdf)):
-            link_name = p.getJointInfo(self.urdf, joint_number)[
+        for joint_number in range(self.server.getNumJoints(self.urdf)):
+            link_name = self.server.getJointInfo(self.urdf, joint_number)[
                 12].decode("utf-8")
             self._link_name_to_index[link_name] = joint_number
 
@@ -47,20 +48,20 @@ class EndeffectorTool:
 
         if connector_frame is None:
             self._connector_id = -1
-            base_pos, base_ori = p.getBasePositionAndOrientation(self.urdf)
+            base_pos, base_ori = self.server.getBasePositionAndOrientation(self.urdf)
         else:
             self._connector_id = self._convert_link_to_id(connector_frame)
-            link_state = p.getLinkState(self.urdf, self._connector_id)
+            link_state = self.server.getLinkState(self.urdf, self._connector_id)
             base_pos = link_state[0]
             base_ori = link_state[1]
 
-        self._tcp_translation, self._tcp_rotation = p.multiplyTransforms(
-            *p.invertTransform(base_pos, base_ori), *self.get_tool_pose(tcp_frame))
+        self._tcp_translation, self._tcp_rotation = self.server.multiplyTransforms(
+            *self.server.invertTransform(base_pos, base_ori), *self.get_tool_pose(tcp_frame))
 
         self._coupled_robot = None
         self._coupling_link = None
 
-        self._coupling_constraint = p.createConstraint(self.urdf,
+        self._coupling_constraint = self.server.createConstraint(self.urdf,
                                                        -1, -1, -1,
                                                        p.JOINT_FIXED,
                                                        [0, 0, 0],
@@ -101,8 +102,8 @@ class EndeffectorTool:
                 endeffector_name)
         self._coupled_robot = robot
         self._coupling_link = endeffector_name
-        p.removeConstraint(self._coupling_constraint)
-        self._coupling_constraint = p.createConstraint(self._coupled_robot.urdf, endeffector_index,
+        self.server.removeConstraint(self._coupling_constraint)
+        self._coupling_constraint = self.server.createConstraint(self._coupled_robot.urdf, endeffector_index,
                                                        self.urdf, self._connector_id,
                                                        p.JOINT_FIXED,
                                                        [0, 0, 0],
@@ -126,9 +127,9 @@ class EndeffectorTool:
         """
         self._coupled_robot = None
         self._coupling_link = None
-        p.removeConstraint(self._coupling_constraint)
-        position, orientation = p.getBasePositionAndOrientation(self.urdf)
-        self._coupling_constraint = p.createConstraint(self.urdf,
+        self.server.removeConstraint(self._coupling_constraint)
+        position, orientation = self.server.getBasePositionAndOrientation(self.urdf)
+        self._coupling_constraint = self.server.createConstraint(self.urdf,
                                                        -1, -1, -1,
                                                        p.JOINT_FIXED,
                                                        [0, 0, 0],
@@ -154,7 +155,7 @@ class EndeffectorTool:
         else:
             tcp_id = self._convert_link_to_id(tcp_frame)
 
-        link_state = p.getLinkState(self.urdf, tcp_id)
+        link_state = self.server.getLinkState(self.urdf, tcp_id)
 
         position = np.array(link_state[0])
         orientation = np.array(link_state[1])
@@ -174,19 +175,19 @@ class EndeffectorTool:
         """
 
         if self.is_coupled():
-            tcp_translation_inv, tcp_rotation_inv = p.invertTransform(
+            tcp_translation_inv, tcp_rotation_inv = self.server.invertTransform(
                 self._tcp_translation, self._tcp_rotation)
-            adj_target_position, adj_target_orientation = p.multiplyTransforms(
+            adj_target_position, adj_target_orientation = self.server.multiplyTransforms(
                 target_position, target_orientation, tcp_translation_inv, tcp_rotation_inv)
 
             self._coupled_robot.set_endeffector_pose(
                 adj_target_position, adj_target_orientation, endeffector_name=self._coupling_link)
         else:
             if target_orientation is None:
-                _, adj_target_orientation = p.getBasePositionAndOrientation(
+                _, adj_target_orientation = self.server.getBasePositionAndOrientation(
                     self.urdf)
-            p.removeConstraint(self._coupling_constraint)
-            self._coupling_constraint = p.createConstraint(self.urdf,
+            self.server.removeConstraint(self._coupling_constraint)
+            self._coupling_constraint = self.server.createConstraint(self.urdf,
                                                            self._tcp_id, -1, -1,
                                                            p.JOINT_FIXED,
                                                            [0, 0, 0],
@@ -208,10 +209,10 @@ class EndeffectorTool:
         """
         if world_coordinates:
             position, _ = self.get_tool_pose()
-            p.applyExternalForce(self.urdf, self._tcp_id,
+            self.server.applyExternalForce(self.urdf, self._tcp_id,
                                  force, position, p.WORLD_FRAME)
         else:
-            p.applyExternalForce(self.urdf, self._tcp_id,
+            self.server.applyExternalForce(self.urdf, self._tcp_id,
                                  force, [0, 0, 0], p.LINK_FRAME)
 
     def apply_tcp_torque(self, torque: np.array):
@@ -223,7 +224,7 @@ class EndeffectorTool:
         Args:
             torque (np.array): A 3 dimensional torque vector in Newtonmeter.
         """
-        p.applyExternalTorque(self.urdf, self._tcp_id,
+        self.server.applyExternalTorque(self.urdf, self._tcp_id,
                               torque, p.LINK_FRAME)
 
     def _convert_link_to_id(self, tcp: str):
