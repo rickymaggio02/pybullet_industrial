@@ -218,6 +218,9 @@ class MotionPlanner:
         # Get current robot position as reference
         base_pos, _ = p.getBasePositionAndOrientation(self.robot.urdf)
         
+        # Convert PyBullet Vector to numpy array
+        base_pos = np.array(base_pos)
+        
         # Conservative workspace bounds relative to robot base
         # These bounds assume the robot can reach ±1.5m in each direction from base
         # You should adjust these based on your specific robot's reach
@@ -749,6 +752,12 @@ class MotionPlanner:
         # Get current tool pose as start
         start_position, start_orientation = self.tool.get_tool_pose()
         
+        # Convert PyBullet Vector objects to numpy arrays
+        start_position = np.array(start_position)
+        start_orientation = np.array(start_orientation)
+        target_position = np.array(target_position)
+        target_orientation = np.array(target_orientation)
+
         # Create a simple linear interpolation path in tool pose space
         num_steps = 50
         path = []
@@ -783,6 +792,11 @@ class MotionPlanner:
         
         # Get current tool pose
         current_position, current_orientation = self.tool.get_tool_pose()
+        
+        # Convert PyBullet Vector objects to numpy arrays
+        current_position = np.array(current_position)
+        current_orientation = np.array(current_orientation)
+        target_position = np.array(target_position)
         
         # Create a simple linear interpolation path in tool position space
         num_steps = 50
