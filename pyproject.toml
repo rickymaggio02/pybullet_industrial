@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pybullet_industrial"
+version = "1.0.4"
+description = "Pybullet_industrial is a process-aware robot simulation framework for pybullet."
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Jan Baumgärtner, Malte Hansjosten, Dominik Schönhofen"}
+]
+maintainers = [
+    {name = "Ricky Maggio"}
+]
+keywords = ["robotics", "simulation", "pybullet", "industrial"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Robotics",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "numpy<2.0.0",
+    "pybullet",
+    "scipy",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "black",
+    "flake8",
+    "mypy",
+]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+    "myst-parser",
+]
+
+[project.urls]
+Homepage = "https://pybullet-industrial.readthedocs.io/en/latest/"
+Repository = "https://github.com/rickymaggio02/pybullet_industrial"
+Documentation = "https://pybullet-industrial.readthedocs.io/en/latest/"
+Issues = "https://github.com/rickymaggio02/pybullet_industrial/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pybullet_industrial = ["*.py", "*.pyi", "*.txt", "*.md"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true 
