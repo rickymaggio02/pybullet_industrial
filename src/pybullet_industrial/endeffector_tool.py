@@ -11,6 +11,7 @@ class EndeffectorTool:
         urdf_model (str): A valid path to a urdf file describint the tool geometry
         start_position (np.array): the position at which the tool should be spawned
         start_orientation (np.array): the orientation at which the tool should be spawned
+        global_scale (float): Global scaling factor for the URDF model. Defaults to 1.0.
         coupled_robot (pi.RobotBase, optional): A pybullet_omdistrial.RobotBase object if
                                                 the robot is coupled from the start.
                                                 Defaults to None.
@@ -23,7 +24,7 @@ class EndeffectorTool:
     """
 
     def __init__(self, urdf_model: str, start_position: np.array, start_orientation: np.array, pybullet_server,
-                 coupled_robot: RobotBase = None, tcp_frame: str = None,
+                 global_scale: float = 1.0, coupled_robot: RobotBase = None, tcp_frame: str = None,
                  connector_frame: str = None):
 
         self.server = pybullet_server
@@ -31,7 +32,8 @@ class EndeffectorTool:
         self.urdf = self.server.loadURDF(urdf_model,
                                start_position, start_orientation,
                                flags=urdf_flags,
-                               useFixedBase=False)
+                               useFixedBase=False,
+                               globalScaling=global_scale)
 
         self._link_name_to_index = {}
         self._coupled_robots = {}

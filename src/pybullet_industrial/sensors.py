@@ -14,6 +14,7 @@ class Camera(EndeffectorTool):
         urdf_model (str): A valid path to a urdf file describint the tool geometry
         start_position (np.array): the position at which the tool should be spawned
         start_orientation (np.array): the orientation at which the tool should be spawned
+        global_scale (float): Global scaling factor for the URDF model. Defaults to 1.0.
         camera_parameters (Dict[str,float]): A dictionary containing the camera parameters.
                                              Default Values are:
                                              'width': 480,
@@ -33,12 +34,12 @@ class Camera(EndeffectorTool):
                                          Defaults to None in which case the base link is used.
     """
 
-    def __init__(self, urdf_model: str, start_position: np.array, start_orientation: np.array, pybullet_server,
-                 camera_parameters: Dict, coupled_robot: RobotBase = None,
+    def __init__(self, urdf_model: str, start_position: np.array, start_orientation: np.array, pybullet_server, 
+                 global_scale: float = 1.0, camera_parameters: Dict = None, coupled_robot: RobotBase = None,
                  camera_frame: str = None, connector_frame: str = None):
 
         super().__init__(urdf_model, start_position, start_orientation, pybullet_server, 
-                         coupled_robot, camera_frame, connector_frame)
+                         global_scale, coupled_robot, camera_frame, connector_frame)
 
         self.server = pybullet_server
 
@@ -104,3 +105,18 @@ class Camera(EndeffectorTool):
             width, height, view_matrix, self.projection_matrix)
         img = np.reshape(images[2], (height, width, 4))
         return img
+
+    def reset_camera_position(self, position):
+        """Reset the camera position to a new location
+        
+        Args:
+            position (np.array or list): New position [x, y, z] for the camera
+        """
+        if isinstance(position, list):
+            position = np.array(position)
+        
+        # Get current orientation to maintain it
+        current_pos, current_ori = self.server.getBasePositionAndOrientation(self.urdf)
+        
+        # Reset the base position of the camera URDF
+        self.server.resetBasePositionAndOrientation(self.urdf, position, current_ori)

@@ -22,10 +22,10 @@ class Gripper(EndeffectorTool):
                                             Defaults to None in which case the base link is used.
     """
 
-    def __init__(self, urdf_model: str, start_position, start_orientation, pybullet_server, 
+    def __init__(self, urdf_model: str, start_position, start_orientation, pybullet_server, global_scale=1.0,
                  coupled_robots=None, tcp_frame=None, connector_frames=None):
 
-        super().__init__(urdf_model, start_position, start_orientation, pybullet_server,
+        super().__init__(urdf_model, start_position, start_orientation, pybullet_server, global_scale,
                          coupled_robots, tcp_frame, connector_frames)
 
         self._joint_name_to_index = {}
@@ -93,6 +93,7 @@ class SuctionGripper(EndeffectorTool):
         urdf_model (str): A valid path to a urdf file describing the tool geometry
         start_position (np.array): the position at which the tool should be spawned
         start_orientation (np.array): the orientation at which the tool should be spawned
+        global_scale (float): Global scaling factor for the URDF model. Defaults to 1.0.
         coupled_robots (pi.RobotBase, optional): A wbk_sim.Robot object if
                                                  the robot is coupled from the start.
                                                  Defaults to None.
@@ -109,10 +110,10 @@ class SuctionGripper(EndeffectorTool):
     """
 
     def __init__(self, urdf_model: str, start_position, start_orientation, pybullet_server,
-                 coupled_robots=None, tcp_frame=None, connector_frames=None, suction_links=None):
+                 global_scale: float = 1.0, coupled_robots=None, tcp_frame=None, connector_frames=None, suction_links=None):
 
         super().__init__(urdf_model, start_position, start_orientation, pybullet_server,
-                         coupled_robots, tcp_frame, connector_frames)
+                         global_scale, coupled_robots, tcp_frame, connector_frames)
         self.suction_constraints = []
         self._suction_links_ids = []
 
