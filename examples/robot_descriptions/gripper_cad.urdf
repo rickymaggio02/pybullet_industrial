@@ -22,8 +22,8 @@
       <stiffness value="30000.0"/>
       <damping value="1000.0"/>
       <spinning_friction value="0.1"/>
-      <lateral_friction value="3.0"/>
-      <contact_cfm value="0.2"/>
+      <lateral_friction value="100.0"/>
+      <contact_cfm value="0.1"/>
     </contact>
   	<inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -50,8 +50,8 @@
       <stiffness value="30000.0"/>
       <damping value="1000.0"/>
       <spinning_friction value="0.1"/>
-      <lateral_friction value="3.0"/>
-      <contact_cfm value="0.2"/>
+      <lateral_friction value="100.0"/>
+      <contact_cfm value="0.1"/>
     </contact>
   	<inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
