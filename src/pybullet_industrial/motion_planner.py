@@ -19,9 +19,13 @@ try:
     ompl_paths = [
         # Relative path from current package
         os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'test_motion_planner', 'ompl', 'py-bindings'),
-        # System installation path
+        # Docker OMPL installation paths
         '/usr/local/lib/python3.10/site-packages',
         '/usr/local/lib/python3.10/dist-packages',
+        '/usr/local/lib/python3/site-packages',
+        # OMPL py-bindings directory (created during build)
+        '/tmp/ompl/py-bindings',
+        '/usr/local/ompl/py-bindings',
         # Alternative system paths
         '/usr/lib/python3/dist-packages',
         '/usr/local/lib/python3/site-packages',
