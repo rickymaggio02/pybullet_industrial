@@ -26,7 +26,7 @@ try:
         '/usr/lib/python3/dist-packages',
         '/usr/local/lib/python3/site-packages',
     ]
-    
+    print(f"NEW OMPL paths: {ompl_paths}")
     ompl_found = False
     for ompl_path in ompl_paths:
         if os.path.exists(ompl_path):
