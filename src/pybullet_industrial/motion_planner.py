@@ -18,17 +18,17 @@ try:
     # Try multiple paths to find OMPL Python bindings
     ompl_paths = [
         # Relative path from current package
-        os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'test_motion_planner', 'ompl', 'py-bindings'),
+        # os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'test_motion_planner', 'ompl', 'py-bindings'),
         # Docker OMPL installation paths
-        '/usr/local/lib/python3.10/site-packages',
-        '/usr/local/lib/python3.10/dist-packages',
-        '/usr/local/lib/python3/site-packages',
         # OMPL py-bindings directory (created during build)
+        # '/app/test_motion_planner/ompl/py-bindings',
+        # '/app/.venv/lib/python3.10/site-packages',
+        '/app/tmp/ompl/py-bindings',
         '/tmp/ompl/py-bindings',
         '/usr/local/ompl/py-bindings',
         # Alternative system paths
-        '/usr/lib/python3/dist-packages',
-        '/usr/local/lib/python3/site-packages',
+        # '/usr/lib/python3/dist-packages',
+        # '/usr/local/lib/python3/site-packages',
     ]
     print(f"NEW OMPL paths: {ompl_paths}")
     ompl_found = False
@@ -43,7 +43,7 @@ try:
     if not ompl_found:
         print("Warning: OMPL path not found in common locations")
         print("Attempting to import OMPL from system Python path...")
-    
+    import ompl
     from ompl import base as ob
     from ompl import geometric as og
     OMPL_AVAILABLE = True
