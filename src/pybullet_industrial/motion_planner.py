@@ -15,19 +15,42 @@ from itertools import product
 
 # Try to import OMPL bindings
 try:
-    # Add OMPL path if available
-    ompl_path = '/home/rickymaggio/Documents/experiment/test_simulation/XeleritCoderBackend/test_motion_planner/ompl/py-bindings'
-    print(f"OMPL path: {ompl_path}")
-    if os.path.exists(ompl_path):
-        sys.path.insert(0, ompl_path)
+    # Try multiple paths to find OMPL Python bindings
+    ompl_paths = [
+        # Relative path from current package
+        os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'test_motion_planner', 'ompl', 'py-bindings'),
+        # System installation path
+        '/usr/local/lib/python3.10/site-packages',
+        '/usr/local/lib/python3.10/dist-packages',
+        # Alternative system paths
+        '/usr/lib/python3/dist-packages',
+        '/usr/local/lib/python3/site-packages',
+    ]
+    
+    ompl_found = False
+    for ompl_path in ompl_paths:
+        if os.path.exists(ompl_path):
+            print(f"Found OMPL path: {ompl_path}")
+            if ompl_path not in sys.path:
+                sys.path.insert(0, ompl_path)
+            ompl_found = True
+            break
+    
+    if not ompl_found:
+        print("Warning: OMPL path not found in common locations")
+        print("Attempting to import OMPL from system Python path...")
     
     from ompl import base as ob
     from ompl import geometric as og
     OMPL_AVAILABLE = True
-except ImportError:
+    print("✓ OMPL Python bindings successfully imported")
+    
+except ImportError as e:
     OMPL_AVAILABLE = False
-    print("Warning: OMPL not available. Motion planning will not work.")
+    print(f"Warning: OMPL not available. Motion planning will not work.")
+    print(f"Import error: {e}")
     print("Please install OMPL with Python bindings to use motion planning features.")
+    print("In Docker, ensure OMPL is built and installed system-wide.")
 
 
 class MotionPlanner:
