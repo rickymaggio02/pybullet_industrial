@@ -48,7 +48,7 @@ class Gripper(EndeffectorTool):
                 self._lower_joint_limit[joint_number] = lower_limit
                 self._upper_joint_limit[joint_number] = upper_limit
 
-        self.max_joint_force = 20 * np.ones(p.getNumJoints(self.urdf))
+        self.max_joint_force = 10000 * np.ones(p.getNumJoints(self.urdf))
 
         for joint_number in range(p.getNumJoints(self.urdf)):
             p.resetJointState(self.urdf, joint_number, targetValue=0)

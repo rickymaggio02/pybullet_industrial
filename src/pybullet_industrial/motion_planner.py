@@ -23,9 +23,10 @@ try:
         # OMPL py-bindings directory (created during build)
         # '/app/test_motion_planner/ompl/py-bindings',
         # '/app/.venv/lib/python3.10/site-packages',
+        #'/home/rickymaggio/Documents/experiment/test_simulation/XeleritCoderBackend/test_motion_planner/ompl/py-bindings',
         '/app/tmp/ompl/py-bindings',
         '/tmp/ompl/py-bindings',
-        '/usr/local/ompl/py-bindings',
+        '/usr/local/ompl/py-bindings'
         # Alternative system paths
         # '/usr/lib/python3/dist-packages',
         # '/usr/local/lib/python3/site-packages',
@@ -785,8 +786,10 @@ class MotionPlanner:
         target_position = np.array(target_position)
         target_orientation = np.array(target_orientation)
 
+        distance = np.linalg.norm(target_position - start_position)
+        num_steps = max(int(distance * 500 / 0.7), 60)
+
         # Create a simple linear interpolation path in tool pose space
-        num_steps = 50
         path = []
         
         for i in range(num_steps + 1):
@@ -826,7 +829,7 @@ class MotionPlanner:
         target_position = np.array(target_position)
         
         # Create a simple linear interpolation path in tool position space
-        num_steps = 50
+        num_steps = self.interpolation_steps
         path = []
         
         for i in range(num_steps + 1):
@@ -921,6 +924,17 @@ class MotionPlanner:
                 self.tool.set_tool_pose(position, orientation)
                 p.stepSimulation()
                 time.sleep(step_delay)
+    
+    # def draw_tool_path(self, path):
+    #     if not isinstance(path[0], (tuple, list)) or len(path[0]) != 2:
+    #             raise ValueError("For tool planning, path must be a list of (position, orientation) tuples")
+        
+    #     from pybullet_industrial.utility import draw_path
+    #     path = []
+    #     for position, orientation in path:
+    #         path.append(position)
+    #     path = np.array(path)
+    #     draw_path(path, color=[0, 0, 1], width=2.0)
     
     def execute_tool_path(self, path: List[Tuple[np.ndarray, np.ndarray]], 
                          step_delay: float = 0.01):

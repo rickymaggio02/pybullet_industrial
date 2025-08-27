@@ -19,10 +19,10 @@
   <link name="leftfinger">
       <contact>
       <friction_anchor/>
-      <stiffness value="30000.0"/>
+      <stiffness value="50000.0"/>
       <damping value="1000.0"/>
       <spinning_friction value="0.1"/>
-      <lateral_friction value="100.0"/>
+      <lateral_friction value="200.0"/>
       <contact_cfm value="0.1"/>
     </contact>
   	<inertial>
@@ -47,10 +47,10 @@
   <link name="rightfinger">
       <contact>
       <friction_anchor/>
-      <stiffness value="30000.0"/>
+      <stiffness value="50000.0"/>
       <damping value="1000.0"/>
       <spinning_friction value="0.1"/>
-      <lateral_friction value="100.0"/>
+      <lateral_friction value="200.0"/>
       <contact_cfm value="0.1"/>
     </contact>
   	<inertial>
